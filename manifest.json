@@ -1,0 +1,38 @@
+{
+    "manifest_version": 3,
+    "name": "DJI - ASSISTANT DA",
+    "description": "Essa e uma extensão utiliza para axiliar o DA",
+    "version": "1.0",
+    "action": {
+      "default_popup": "popup/index.html",
+      "default_icon": "logo.png"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "webRequest",
+        "declarativeNetRequest",
+        "tabs",
+        "clipboardWrite",
+        "clipboardRead"
+    ],
+    "content_scripts": [
+        {
+        "matches": ["<all_urls>"],
+        "js": ["src/scripts/auto_complete.js"],
+        "css":["src/style/input.css"]
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+Q"
+            },
+            "description": "Abrir o popup da extensão"
+        }
+    }
+}

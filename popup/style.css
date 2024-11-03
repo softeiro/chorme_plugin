@@ -1,0 +1,62 @@
+form {
+    background-color: #f8f8f8;
+    width: 300px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.WHPB20 {
+    width: 100%;
+    padding: 15px;
+    outline: none;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 15px;
+    background-color: #0655a4;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.button-repair:hover,.button:hover {
+    background-color: #063f79;
+}
+
+#copyAllButton {
+    z-index: 2;
+    position: absolute;
+    appearance: none;
+    border: none;
+    padding: none;
+    background-color: transparent;
+    left:325px;
+    top: 1px;
+}
+#copyAllButton svg {
+    width: 15px;
+    fill: #032e58;
+}
+#copyAllButton svg:hover {
+    fill: #000000;
+}
+
+.button-repair {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 15px;
+    background-color: #0655a4;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
