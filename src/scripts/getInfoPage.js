@@ -6,14 +6,16 @@ const technicalReport = [
     "RC - Placa Principal com Falha",
     "RC - Conector USB com Intermitente",
     "Bateria RC-Plus Inchada",
-    "RC-N1 Falha",
-    "Bateria RC-N2 Ausente",
-    "Hélice CCW Danificada",
-    "Hélice de Baixo Ruído com Marcas",
-    "Hélice CW danificada",
-    "Hélice Preta sem marcas",
-    "Hélice Azul com riscos",
+    "RC-N1 - com marcas na capa superior",
+    "RC-N1 - Falha na Placa Principal",
+    "RC-N2 - Bateria RC-N2 Ausente",
+    "Hélice CCW - Danificada",
+    "Hélice de Baixo Ruído - com Marcas",
+    "Hélice CW - ausente",
+    "Hélice Preta - sem marcas",
+    "Hélice Azul - com riscos",
     "(2) Bateria - Inchada",
+    "Bateria 02 - Danificada",
     "Compartimento de Bateria Danificado",
     "Caixa de Bateria Danificada"
 ];
@@ -25,8 +27,6 @@ const keywords = {
     withoutDamage: ["sem riscos", "sem marcas", "sem falha"]
 };
 
-const propellerTypes = ["CCW", "CW", "de Baixo Ruído", "Preta", "Azul"];
-const propellerRegex = new RegExp(`Hélice (${propellerTypes.join("|")})`, "i");
 
 function determineStatus(description) {
     const lowerDesc = description.toLowerCase();
@@ -45,25 +45,26 @@ function determineStatus(description) {
     return { status: "Undetermined", type: "Undetermined" };
 }
 
-function identifyComponent(description) {
-    if (/RC(?:-\w+)?/.test(description)) {
-        const match = description.match(/RC(?:-\w+)?/)[0];
-        return `Controle ${match}`; 
+function extractBeforeDash(sentence) {
+    if (sentence.includes(" - ")) {
+        return sentence.split(" - ")[0].replace(/\(.*?\)/g, '').trim();
     }
-    if (/^Bateria(?:\s+\w+)*\s*-\s*\w+/i.test(description)) {
-        const match = description.match(/^Bateria(?:\s+\w+)*(?=\s*-\s*\w+)/i);
-        return `${match[0]}`; 
-    }
-    if (propellerRegex.test(description)) {
-        const match = description.match(propellerRegex)[1];
-        return `Hélice ${match}`;
-    }
-    return "Aircraft"; 
+    return sentence;
 }
 
-const globalStatus = {
-    "Controller": {}, 
-    "Aircraft": "Undetermined" 
+function identifyComponent(description) {
+    const regexComponents = /^(?:\(\d+\)\s*)?([^\-]+(?:-[^\-]+)*)\s+-\s+.+$/m;
+    if(regexComponents.test(description)) {
+        let match = extractBeforeDash(description);
+        if (match) {
+            match = match.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return match !== "aeronave" && match !== "ac" && match !== "drone" ? match : "Aeronave";
+        }
+    }
+    return "Aeronave"; 
+}
+
+let globalStatus = {
 };
 
 const groupedResult = technicalReport.reduce((acc, item) => {
@@ -72,17 +73,9 @@ const groupedResult = technicalReport.reduce((acc, item) => {
 
     const quantityMatch = item.match(/\((\d+)\)/)
     const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-
-    if (component.startsWith("Controle")) {
-        const controllerType = component;
-        if (status.status === "Out of Warranty") {
-            globalStatus["Controller"][controllerType] = "Out of Warranty";
-        }
+    if (status.status === "Out of Warranty") {
+        globalStatus[component] = "Out of Warranty";
     }
-    if (component === "Aircraft" && status.status === "Out of Warranty") {
-        globalStatus["Aircraft"] = "Out of Warranty";
-    }
-
     if (!acc[component]) {
         acc[component] = [];
     }
@@ -115,24 +108,22 @@ for (const component in countedResult) {
 }
 
 for (const component in finalResult) {
-    if (component.startsWith("Controle")) {
-        const controllerType = component;
-        if (globalStatus["Controller"][controllerType] === "Out of Warranty") {
+    if (component === "Aircraft" && globalStatus["Aircraft"] === "Out of Warranty") {
+        finalResult[component].forEach(item => {
+            item.status = "Out of Warranty";
+            item.type = "Replacement";
+        });
+    } else {
+        if (globalStatus[component] === "Out of Warranty") {
             finalResult[component].forEach(item => {
                 item.status = "Out of Warranty";
                 item.type = "Replacement";
             });
         }
     }
-    if (component === "Aircraft" && globalStatus["Aircraft"] === "Out of Warranty") {
-        finalResult[component].forEach(item => {
-            item.status = "Out of Warranty";
-            item.type = "Replacement";
-        });
-    }
 }
 
-//console.log(finalResult);
+console.log(finalResult);
 
 
 function formatComponentStatus(groupedResult) {
@@ -157,17 +148,17 @@ function formatComponentStatus(groupedResult) {
     return formattedResult;
 }
 
-console.log(formatComponentStatus(finalResult));
-console.log(formatComponentStatus(groupedResult));
+// console.log(formatComponentStatus(finalResult));
+// console.log(formatComponentStatus(groupedResult));
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.data) {
-        if(request.data !== "getInfoPage") return;
-        const info = "Bolsonaro e Norte"; // Substitua isso pela informação real que você deseja retornar
-        sendResponse({ message: info });
-    }
-    return true;
-});
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//     if (request.data) {
+//         if(request.data !== "getInfoPage") return;
+//         const info = "Bolsonaro e Norte"; // Substitua isso pela informação real que você deseja retornar
+//         sendResponse({ message: info });
+//     }
+//     return true;
+// });
 
 /*
 popup.js
@@ -181,4 +172,17 @@ popup.js
     });
 });
 
+*/
+/* if (window.location.href.includes('da')) {} */
+
+/*
+document.querySelectorAll('iframe').forEach(iframe => {
+  iframe.addEventListener('load', () => {
+    // codiguin
+  });
+});
+window.addEventListener('load', () => {
+  console.log('A página foi completamente carregada');
+});
+MutationObserver // Mudanças DOM
 */

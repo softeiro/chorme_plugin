@@ -203,14 +203,21 @@ function createSuggestionSpan(inputField, newWord, currentWordLength) {
     inputField.parentNode.insertBefore(suggestionSpan, inputField.nextSibling);
 }
 
-function autocompleteInput(inputField, newWord) {
+function autocompleteInput(inputField, newWord,afer,before) {
     let [inputText, inputAllText] = [inputField.value, ""];
     if (inputText.includes(' ')) {
         [inputAllText, inputText] = splitLastWord(inputField.value);
         if (inputText === false) return;
     }
-    const trimmedInputText = inputText.replace(/\s+$/, ''); 
-    inputField.value = inputAllText+trimmedInputText + newWord + ' ';
+    //const trimmedInputText = inputText.replace(/\s+$/, ''); 
+    const newCursorPosition = before.length + newWord.length + 1; 
+    inputField.value = before+newWord+" "+afer;
+
+    setTimeout(() => {
+        inputField.selectionStart = inputField.selectionEnd = newCursorPosition;    
+        inputField.focus();
+    }, 2);
+    
     const existingSuggestion = inputField.parentNode.querySelector('#TXSUGG13');
     if (existingSuggestion) {
         existingSuggestion.remove();
@@ -221,16 +228,22 @@ document.addEventListener('input', function(event) {
     const inputField = event.target;
 
     if ((inputField.tagName === 'INPUT' && inputField.type === 'text') || inputField.tagName === 'TEXTAREA') {
-        let [inputText, inputAllText] = [inputField.value, ""];
+        const cursorPosition = inputField.selectionStart;
+        const fullText = inputField.value;
+        const textBeforeCursor = fullText.substring(0, cursorPosition);
+        let [inputText, inputAllText] = [textBeforeCursor, ""];
         const existingSuggestion = inputField.parentNode.querySelector('#TXSUGG13');
         if (existingSuggestion) {
             existingSuggestion.remove();
         }
         if (inputText.includes(' ')) {
-            [inputAllText, inputText] = splitLastWord(inputField.value);
+            [inputAllText, inputText] = splitLastWord(inputText); 
             if (inputText === false) return;
+        } else {
+            inputText = inputText.trim().split(/\s/).pop(); 
         }
 
+        inputText = inputText.replace("[", '')
         if (inputText.length <= 0) return;
         console.log("Palavra busca:"+inputText.toLowerCase())
         const matches = allKeyWords.filter(keyword => keyword.toLowerCase().startsWith(inputText.toLowerCase()));
@@ -248,8 +261,13 @@ document.addEventListener('keydown', function(event) {
             event.preventDefault();
             const existingSuggestion = inputField.parentNode.querySelector('#TXSUGG13');
             console.log(`valor:${ existingSuggestion.textContent}`)
+            const cursorPosition = inputField.selectionStart;
+            const fullText = inputField.value;
+            const textAfterCursor = fullText.substring(cursorPosition);
+            const textBeforeCursor = fullText.substring(0, cursorPosition);
+
             if (existingSuggestion) {
-                autocompleteInput(inputField, existingSuggestion.textContent);
+                autocompleteInput(inputField, existingSuggestion.textContent,textAfterCursor,textBeforeCursor);
             }
         }
     }
