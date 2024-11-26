@@ -21,8 +21,9 @@
         {
         "matches": ["<all_urls>"],
         "js": [
-            "src/scripts/autoSBOM.js",
-            "src/scripts/config.js"
+            "src/scripts/auto_complete.js", 
+            "src/scripts/getInfoPage.js"
+            "src/scripts/autoSBOM.js"
         ],
         "css":["src/style/input.css"]
         }
