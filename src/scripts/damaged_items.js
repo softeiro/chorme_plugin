@@ -1,3 +1,4 @@
+
 const similarWords = {
     ["CoreBoard"]:"Placa Principal",
     ["Flight Controller"]: "Controlador de voo",

@@ -1,3 +1,4 @@
+
 const keywordsForDamages = [
     "Danificado",
     "Falha",
