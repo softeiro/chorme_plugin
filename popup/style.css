@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 form {
     background-color: #f8f8f8;
     width: 300px;
@@ -7,6 +9,8 @@ form {
 }
 
 .WHPB20 {
+    margin-top: 7px;
+    font-family: "Montserrat", sans-serif;
     width: 100%;
     padding: 15px;
     outline: none;
@@ -16,6 +20,7 @@ form {
 }
 
 .button {
+    font-family: "Montserrat", sans-serif;
     width: 100%;
     padding: 15px;
     border: none;
@@ -23,7 +28,7 @@ form {
     margin-top: 15px;
     background-color: #0655a4;
     color: white;
-    font-weight: 700;
+    font-weight: 500;
     cursor: pointer;
 }
 
@@ -50,6 +55,7 @@ form {
 }
 
 .button-repair {
+    font-family: "Montserrat", sans-serif;
     width: 100%;
     padding: 15px;
     border: none;
@@ -57,6 +63,15 @@ form {
     margin-top: 15px;
     background-color: #0655a4;
     color: white;
-    font-weight: 700;
+    font-weight: 500;
     cursor: pointer;
+}
+
+.checkbox-container {
+    position: relative;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    color: #000000ce;
+    font-size: 13px;
+    padding: 1px;
 }

@@ -1,56 +1,64 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const uwReportTextArea = document.getElementById('UW_report');
-    const oowReportTextArea = document.getElementById('OOW_report');
-    const salesReportTextArea = document.getElementById('SALES_report');
-    const saveButton = document.getElementById('saveButton');
+    const textArea = document.getElementById('report');
     const damagedAssetsButton = document.getElementById('damagedAssetsButton');
     const repairSolutionButton = document.getElementById('repairSolutionButton');
+    const copyAllButton = document.getElementById('copyAllButton');
 
-    chrome.storage.local.get(['reports'], function(result) {
-        if (result.reports) {
-            uwReportTextArea.value = result.reports.uwReport || '';
-            oowReportTextArea.value = result.reports.oowReport || '';
-            salesReportTextArea.value = result.reports.salesReport || '';
+    chrome.storage.local.get(['savedText'], function(result) {
+        if (result.savedText) {
+            textArea.value = result.savedText;
         }
     });
 
-    const saveReports = () => {
-        const reports = {
-            uwReport: uwReportTextArea.value,
-            oowReport: oowReportTextArea.value,
-            salesReport: salesReportTextArea.value
-        };
-        chrome.storage.local.set({ reports: reports }, function() {
-            console.log('Relatórios salvos:', reports);
+    if (textArea) {
+        textArea.addEventListener('input', function() {
+            chrome.storage.local.set({ savedText: textArea.value });
         });
-    };
+    }
 
-    uwReportTextArea.addEventListener('input', saveReports);
-    oowReportTextArea.addEventListener('input', saveReports);
-    salesReportTextArea.addEventListener('input', saveReports);
+    if (damagedAssetsButton) {
+        damagedAssetsButton.addEventListener('click', async function() {    
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, { data: "getInfoPage" }, (response) => {
+                    if (response) {
+                        const value = textArea.value + response.message;
+                        chrome.storage.local.set({ savedText: value });
 
-    damagedAssetsButton.addEventListener('click', function() {
-        const reportText = uwReportTextArea.value; // ou qualquer textarea desejada
-        chrome.runtime.sendMessage({ type: "damagedAssets", content: reportText });
-    });
-
-    repairSolutionButton.addEventListener('click', function() {
-        chrome.storage.local.set({ reports: { uwReport: "", oowReport: "", salesReport: "" } }, function() {
-            console.log('Relatórios limpos.');
-        });
-        chrome.runtime.sendMessage({ type: "repairSolution" });
-    });
-    const copyAllButton = document.getElementById('copyAllButton');
-    function copyAll() {
-        const allText = `${uwReportTextArea.value}${oowReportTextArea.value}${salesReportTextArea.value}`;
+                    }
+                });
+            });
         
+            // let infoBack = ""; 
+            // if (response && response.text) {
+            //     infoBack = response.text; 
+            // } else {
+            //     console.log("Nenhuma resposta ou resposta inválida recebida do background script.");
+            // }
+
+            // const reportText = textArea.value + infoBack; // Construindo o texto do relatório
+            //chrome.runtime.sendMessage({ type: "damagedAssets", content: reportText });
+        });
+    }
+
+    if (repairSolutionButton) {
+        repairSolutionButton.addEventListener('click', function() {
+            chrome.storage.local.set({ savedText: "" });
+            chrome.runtime.sendMessage({ type: "repairSolution" });
+        });
+    }
+
+    function copyAll() {
+        const allText = `${textArea.value}`;
         navigator.clipboard.writeText(allText).then(() => {
-            window.close()        
+            window.close();        
         }).catch(err => {
             console.error("Erro ao copiar texto: ", err);
         });
     }
 
-    // Associa a função ao botão "Copy All"
-    copyAllButton.addEventListener('click', copyAll);
+    if (copyAllButton) {
+        copyAllButton.addEventListener('click', copyAll);
+    }
 });
+
+
